@@ -1,0 +1,440 @@
+about:
+  date: January 27, 2025 15:25:36
+  recent_changes: works with modified safrs-react-admin
+  version: 0.0.0
+api_root: '{http_type}://{swagger_host}:{port}/{api}'
+authentication: '{system-default}'
+info:
+  number_relationships: 12
+  number_tables: 12
+info_toggle_checked: true
+resources:
+  Aircraft:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: model
+      required: true
+    - name: max_capacity
+    - name: aviation_serial_number
+    description: Details of aircraft operated by the airline.
+    info_list: Details of aircraft operated by the airline.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - aircraft_id
+      name: MaintenanceRecordList
+      resource: MaintenanceRecord
+    type: Aircraft
+    user_key: id
+  Airline:
+    attributes:
+    - label: ' name*'
+      name: name
+      required: true
+      search: true
+      sort: true
+    - name: iata_code
+    - name: id
+    description: Airline operator details.
+    info_list: Airline operator details.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - airline_id
+      name: CrewMemberList
+      resource: CrewMember
+    - direction: tomany
+      fks:
+      - airline_id
+      name: RouteList
+      resource: Route
+    type: Airline
+    user_key: name
+  Airport:
+    attributes:
+    - label: ' name*'
+      name: name
+      required: true
+      search: true
+      sort: true
+    - name: location
+    - name: code
+      required: true
+    - name: id
+    description: Stores airport details.
+    info_list: Stores airport details.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - arrival_id
+      name: FlightList
+      resource: Flight
+    - direction: tomany
+      fks:
+      - departure_id
+      name: departureFlightList
+      resource: Flight
+    - direction: tomany
+      fks:
+      - from_airport_id
+      name: RouteList
+      resource: Route
+    - direction: tomany
+      fks:
+      - to_airport_id
+      name: toRouteList
+      resource: Route
+    type: Airport
+    user_key: name
+  BoardingPass:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: booking_id
+      required: true
+    - name: issued_time
+      type: DATETIME
+    - name: seat_number
+    description: Details of boarding passes issued to passengers.
+    info_list: Details of boarding passes issued to passengers.
+    tab_groups:
+    - direction: toone
+      fks:
+      - booking_id
+      name: booking
+      resource: Booking
+    type: BoardingPass
+    user_key: id
+  Booking:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: flight_id
+      required: true
+    - name: passenger_id
+      required: true
+    - name: date_of_booking
+      type: DATETIME
+    - name: seat_number
+    description: Stores ticket booking information linking passengers to flights.
+    info_list: Stores ticket booking information linking passengers to flights.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - booking_id
+      name: BoardingPassList
+      resource: BoardingPass
+    - direction: tomany
+      fks:
+      - booking_id
+      name: CheckInList
+      resource: CheckIn
+    - direction: toone
+      fks:
+      - flight_id
+      name: flight
+      resource: Flight
+    - direction: toone
+      fks:
+      - passenger_id
+      name: passenger
+      resource: Passenger
+    type: Booking
+    user_key: id
+  CheckIn:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: booking_id
+      required: true
+    - name: check_in_time
+      type: DATETIME
+    - name: gate_number
+    description: Check-in details for flights.
+    info_list: Check-in details for flights.
+    tab_groups:
+    - direction: toone
+      fks:
+      - booking_id
+      name: booking
+      resource: Booking
+    type: CheckIn
+    user_key: id
+  CrewMember:
+    attributes:
+    - label: ' first_name*'
+      name: first_name
+      required: true
+      search: true
+      sort: true
+    - name: airline_id
+    - name: last_name
+      required: true
+    - name: position
+    - name: id
+    description: Stores crew member details associated with airlines.
+    info_list: Stores crew member details associated with airlines.
+    tab_groups:
+    - direction: toone
+      fks:
+      - airline_id
+      name: airline
+      resource: Airline
+    type: CrewMember
+    user_key: first_name
+  Flight:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: arrival_id
+    - name: departure_id
+    - name: number
+      required: true
+    - name: date
+      type: DATE
+    description: Details of flights including departure and arrival airports.
+    info_list: Details of flights including departure and arrival airports.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - flight_id
+      name: BookingList
+      resource: Booking
+    - direction: toone
+      fks:
+      - arrival_id
+      name: arrival
+      resource: Airport
+    - direction: toone
+      fks:
+      - departure_id
+      name: departure
+      resource: Airport
+    type: Flight
+    user_key: id
+  Luggage:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: passenger_id
+    - name: weight
+    - name: dimensions
+    description: Details luggage carried by passengers.
+    info_list: Details luggage carried by passengers.
+    tab_groups:
+    - direction: toone
+      fks:
+      - passenger_id
+      name: passenger
+      resource: Passenger
+    type: Luggage
+    user_key: id
+  MaintenanceRecord:
+    attributes:
+    - label: ' description*'
+      name: description
+      search: true
+      sort: true
+    - name: aircraft_id
+      required: true
+    - name: last_maintenance_date
+      type: DATETIME
+    - name: id
+    description: Records maintenance details of aircraft.
+    info_list: Records maintenance details of aircraft.
+    tab_groups:
+    - direction: toone
+      fks:
+      - aircraft_id
+      name: aircraft
+      resource: Aircraft
+    type: MaintenanceRecord
+    user_key: description
+  Passenger:
+    attributes:
+    - label: ' first_name*'
+      name: first_name
+      required: true
+      search: true
+      sort: true
+    - name: last_name
+      required: true
+    - name: passport_number
+    - name: id
+    description: Details of passengers.
+    info_list: Details of passengers.
+    tab_groups:
+    - direction: tomany
+      fks:
+      - passenger_id
+      name: BookingList
+      resource: Booking
+    - direction: tomany
+      fks:
+      - passenger_id
+      name: LuggageList
+      resource: Luggage
+    type: Passenger
+    user_key: first_name
+  Route:
+    attributes:
+    - label: ' id*'
+      name: id
+      search: true
+      sort: true
+    - name: airline_id
+    - name: from_airport_id
+    - name: to_airport_id
+    - name: duration
+    description: Flight route details for airlines.
+    info_list: Flight route details for airlines.
+    tab_groups:
+    - direction: toone
+      fks:
+      - airline_id
+      name: airline
+      resource: Airline
+    - direction: toone
+      fks:
+      - from_airport_id
+      name: from_airport
+      resource: Airport
+    - direction: toone
+      fks:
+      - to_airport_id
+      name: to_airport
+      resource: Airport
+    type: Route
+    user_key: id
+  SPAComponent:
+    attributes:
+    - hidden: true
+      name: id
+      required: true
+    - name: Type
+    - name: prompt
+      type: textarea
+    - name: user_comments
+      type: textarea
+    - name: created_at
+      type: datetime
+    - name: ai_comments
+      type: textarea
+    - label: name
+      name: name
+      required: true
+      search: true
+    - name: code
+      type: textarea
+    hidden: true
+    order: 2002
+    sort: -created_at
+    tab_groups:
+    - direction: tomany
+      fks:
+      - id
+      name: ChildList
+      resource: SPAComponent
+    type: SPAComponent
+    user_key: name
+  SPAPage:
+    attributes:
+    - label: ' name*'
+      name: name
+      required: true
+      search: true
+      sort: true
+    - name: id
+      required: true
+    - name: contact
+    hidden: true
+    order: 2000
+    tab_groups:
+    - direction: tomany
+      fks:
+      - page_id
+      name: SectionList
+      resource: Section
+    type: SPAPage
+    user_key: name
+  SPASection:
+    attributes:
+    - name: order
+      sort: true
+      type: number
+    - label: ' name*'
+      name: name
+      required: true
+      search: true
+    - name: page_id
+    - name: title
+      required: true
+    - name: subtitle
+    - name: label
+    - name: Type
+    - name: paragraph
+      type: textarea
+    - name: content
+      type: textarea
+    - name: id
+    - name: background
+    - name: template
+    - name: style
+      type: json
+    - name: hidden
+      type: boolean
+    hidden: true
+    order: 2001
+    sort: order
+    tab_groups:
+    - direction: toone
+      fks:
+      - page_id
+      name: page
+      resource: SPASection
+    type: SPASection
+    user_key: name
+settings:
+  HomeJS: /admin-app/home.js
+  max_list_columns: 8
+  style_guide:
+    applicationLocales:
+    - en
+    - es
+    currency_symbol: $
+    currency_symbol_position: left
+    date_format: LL
+    decimal_max: '1000000000'
+    decimal_min: '0'
+    decimal_separator: .
+    detail_mode: tab
+    edit_on_mode: dblclick
+    exclude_listpicker: false
+    include_translation: 'false'
+    keycloak_client_id: alsclient
+    keycloak_realm: kcals
+    keycloak_url: http://localhost:8080
+    locale: en
+    max_decimal_digits: '4'
+    min_decimal_digits: '2'
+    new_mode: dialog
+    pick_style: list
+    row_height: small,
+    serviceType: OntimizeEE
+    startSessionPath: /auth/login
+    style: light
+    thousand_separator: ','
+    use_keycloak: 'false'
