@@ -1,10 +1,20 @@
 [
     {
+        "name": "Booking Time Constraint",
+        "description": "Bookings must be made a certain number of hours before a flight departs.",
+        "use_case": "Enforce booking constraints to ensure they are made prior to flight departure.",
+        "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.date_of_booking <= row.flight.scheduled_departure - timedelta(hours=2), error_msg=\"Bookings must be made at least 2 hours before departure\")",
+        "error": null,
+        "status": "active",
+        "entity": null,
+        "id": "01JJP936TCHFF58BAC9QPC6TJZ"
+    },
+    {
         "name": "Passenger Unique Identification",
         "description": "Ensure passengers are uniquely identified by their passport numbers.",
         "use_case": "Avoid duplicate passenger entries using passport numbers.",
         "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")",
-        "error": null,
+        "error": "NameError: name 'Constraint' is not defined",
         "status": "accepted",
         "entity": null,
         "id": "01JJP936TMZH9FGPXMF1HW7D02"

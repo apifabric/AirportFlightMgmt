@@ -1,5 +1,11 @@
 [
     {
+        "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.date_of_booking <= row.flight.scheduled_departure - timedelta(hours=2), error_msg=\"Bookings must be made at least 2 hours before departure\")",
+        "description": "Bookings must be made a certain number of hours before a flight departs.",
+        "name": "Booking Time Constraint",
+        "use_case": "Enforce booking constraints to ensure they are made prior to flight departure."
+    },
+    {
         "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")",
         "description": "Ensure passengers are uniquely identified by their passport numbers.",
         "name": "Passenger Unique Identification",
