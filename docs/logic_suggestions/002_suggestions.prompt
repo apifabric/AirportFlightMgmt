@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Aircraft Max Capacity Constraint",
+        "description": "Ensure the number of passengers on a flight does not exceed aircraft capacity.",
+        "use_case": "A airplane's passengers must not exceed its seating capacity.",
+        "entity": "Flight",
+        "code": "Rule.count(derive=Flight.passenger_count, as_count_of=Booking)\nRule.constraint(validate=Flight, as_condition=lambda row: row.passenger_count <= row.aircraft.max_capacity, error_msg=\"Flight passenger count ({row.passenger_count}) exceeds aircraft capacity ({row.aircraft.max_capacity})\")"
+    },
+    {
+        "name": "Flight Seat Assignment",
+        "description": "Ensure that each passenger has a unique seat assignment on a flight.",
+        "use_case": "Seats assigned to passengers on a flight must be unique.",
+        "entity": "Booking",
+        "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.seat_number is not None, error_msg=\"Booking must have a unique seat number\")"
+    },
+    {
+        "name": "Flight Completion",
+        "description": "Calculate the completion status based on specific flight criteria.",
+        "use_case": "Determine if a flight has been completed based on its attributes.",
+        "entity": "Flight",
+        "code": "Rule.formula(derive=Flight.is_completed, as_expression=lambda row: row.arrival_time <= current_time)"
+    },
+    {
+        "name": "Airline Route Count",
+        "description": "Calculate the number of routes an airline operates.",
+        "use_case": "Ensure airlines keep track of the number of flight routes they manage.",
+        "entity": "Airline",
+        "code": "Rule.count(derive=Airline.route_count, as_count_of=Route)"
+    },
+    {
+        "name": "Booking Time Constraint",
+        "description": "Bookings must be made a certain number of hours before a flight departs.",
+        "use_case": "Enforce booking constraints to ensure they are made prior to flight departure.",
+        "entity": "Booking",
+        "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.date_of_booking <= row.flight.scheduled_departure - timedelta(hours=2), error_msg=\"Bookings must be made at least 2 hours before departure\")"
+    },
+    {
+        "name": "Passenger Unique Identification",
+        "description": "Ensure passengers are uniquely identified by their passport numbers.",
+        "use_case": "Avoid duplicate passenger entries using passport numbers.",
+        "entity": "Passenger",
+        "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")"
+    }
+]

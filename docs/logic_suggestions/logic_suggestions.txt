@@ -1,0 +1,6 @@
+Ensure the number of passengers on a flight does not exceed aircraft capacity.
+Ensure that each passenger has a unique seat assignment on a flight.
+Calculate the completion status based on specific flight criteria.
+Calculate the number of routes an airline operates.
+Bookings must be made a certain number of hours before a flight departs.
+Ensure passengers are uniquely identified by their passport numbers.

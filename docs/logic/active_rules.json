@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")",
+        "description": "Ensure passengers are uniquely identified by their passport numbers.",
+        "name": "Passenger Unique Identification",
+        "use_case": "Avoid duplicate passenger entries using passport numbers."
+    }
+]

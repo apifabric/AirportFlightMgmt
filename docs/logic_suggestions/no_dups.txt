@@ -1,0 +1,3 @@
+Flight.passenger_count
+Flight.is_completed
+Airline.route_count

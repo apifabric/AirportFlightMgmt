@@ -1,0 +1,281 @@
+{
+    "models": [
+        {
+            "classname": "Passenger",
+            "code": "class Passenger(Base):\n    __tablename__ = 'passenger'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    first_name = Column(String, nullable=False)\n    last_name = Column(String, nullable=False)\n    passport_number = Column(String)",
+            "description": "Details of passengers.",
+            "name": "Passenger"
+        },
+        {
+            "classname": "Flight",
+            "code": "class Flight(Base):\n    __tablename__ = 'flight'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    number = Column(String, nullable=False)\n    departure_id = Column(Integer, ForeignKey('airport.id'))\n    arrival_id = Column(Integer, ForeignKey('airport.id'))\n    date = Column(Date)",
+            "description": "Details of flights including departure and arrival airports.",
+            "name": "Flight"
+        },
+        {
+            "classname": "Aircraft",
+            "code": "class Aircraft(Base):\n    __tablename__ = 'aircraft'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    model = Column(String, nullable=False)\n    max_capacity = Column(Integer)\n    aviation_serial_number = Column(String)",
+            "description": "Details of aircraft operated by the airline.",
+            "name": "Aircraft"
+        },
+        {
+            "classname": "Booking",
+            "code": "class Booking(Base):\n    __tablename__ = 'booking'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    flight_id = Column(Integer, ForeignKey('flight.id'), nullable=False)\n    passenger_id = Column(Integer, ForeignKey('passenger.id'), nullable=False)\n    date_of_booking = Column(DateTime)\n    seat_number = Column(String)",
+            "description": "Stores ticket booking information linking passengers to flights.",
+            "name": "Booking"
+        },
+        {
+            "classname": "Airline",
+            "code": "class Airline(Base):\n    __tablename__ = 'airline'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    name = Column(String, nullable=False)\n    iata_code = Column(String)",
+            "description": "Airline operator details.",
+            "name": "Airline"
+        },
+        {
+            "classname": "Route",
+            "code": "class Route(Base):\n    __tablename__ = 'route'\n\n    id = Column(Integer, primary_key=True, autoincrement=True)\n    airline_id = Column(Integer, ForeignKey('airline.id'))\n    from_airport_id = Column(Integer, ForeignKey('airport.id'))\n    to_airport_id = Column(Integer, ForeignKey('airport.id'))\n    duration = Column(Integer)",
+            "description": "Flight route details for airlines.",
+            "name": "Route"
+        }
+    ],
+    "rules": [
+        {
+            "name": "Aircraft Max Capacity Constraint",
+            "description": "Ensure the number of passengers on a flight does not exceed aircraft capacity.",
+            "use_case": "A airplane's passengers must not exceed its seating capacity.",
+            "entity": "Flight",
+            "code": "Rule.count(derive=Flight.passenger_count, as_count_of=Booking)\nRule.constraint(validate=Flight, as_condition=lambda row: row.passenger_count <= row.aircraft.max_capacity, error_msg=\"Flight passenger count ({row.passenger_count}) exceeds aircraft capacity ({row.aircraft.max_capacity})\")"
+        },
+        {
+            "name": "Flight Seat Assignment",
+            "description": "Ensure that each passenger has a unique seat assignment on a flight.",
+            "use_case": "Seats assigned to passengers on a flight must be unique.",
+            "entity": "Booking",
+            "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.seat_number is not None, error_msg=\"Booking must have a unique seat number\")"
+        },
+        {
+            "name": "Flight Completion",
+            "description": "Calculate the completion status based on specific flight criteria.",
+            "use_case": "Determine if a flight has been completed based on its attributes.",
+            "entity": "Flight",
+            "code": "Rule.formula(derive=Flight.is_completed, as_expression=lambda row: row.arrival_time <= current_time)"
+        },
+        {
+            "name": "Airline Route Count",
+            "description": "Calculate the number of routes an airline operates.",
+            "use_case": "Ensure airlines keep track of the number of flight routes they manage.",
+            "entity": "Airline",
+            "code": "Rule.count(derive=Airline.route_count, as_count_of=Route)"
+        },
+        {
+            "name": "Booking Time Constraint",
+            "description": "Bookings must be made a certain number of hours before a flight departs.",
+            "use_case": "Enforce booking constraints to ensure they are made prior to flight departure.",
+            "entity": "Booking",
+            "code": "Rule.constraint(validate=Booking, as_condition=lambda row: row.date_of_booking <= row.flight.scheduled_departure - timedelta(hours=2), error_msg=\"Bookings must be made at least 2 hours before departure\")"
+        },
+        {
+            "name": "Passenger Unique Identification",
+            "description": "Ensure passengers are uniquely identified by their passport numbers.",
+            "use_case": "Avoid duplicate passenger entries using passport numbers.",
+            "entity": "Passenger",
+            "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")"
+        }
+    ],
+    "test_data": "Here's test data for the tables:",
+    "test_data_rows": [
+        {
+            "test_data_row_variable": "airport1",
+            "code": "airport1 = Airport(id=1, name=\"John F. Kennedy International Airport\", location=\"New York, USA\", code=\"JFK\")"
+        },
+        {
+            "test_data_row_variable": "airport2",
+            "code": "airport2 = Airport(id=2, name=\"Los Angeles International Airport\", location=\"Los Angeles, USA\", code=\"LAX\")"
+        },
+        {
+            "test_data_row_variable": "airport3",
+            "code": "airport3 = Airport(id=3, name=\"Narita International Airport\", location=\"Narita, Japan\", code=\"NRT\")"
+        },
+        {
+            "test_data_row_variable": "airport4",
+            "code": "airport4 = Airport(id=4, name=\"Heathrow Airport\", location=\"London, UK\", code=\"LHR\")"
+        },
+        {
+            "test_data_row_variable": "flight1",
+            "code": "flight1 = Flight(id=1, number=\"AA101\", departure_id=1, arrival_id=2, date=date(2023, 7, 15))"
+        },
+        {
+            "test_data_row_variable": "flight2",
+            "code": "flight2 = Flight(id=2, number=\"BA202\", departure_id=4, arrival_id=3, date=date(2023, 8, 16))"
+        },
+        {
+            "test_data_row_variable": "flight3",
+            "code": "flight3 = Flight(id=3, number=\"JL303\", departure_id=3, arrival_id=1, date=date(2023, 9, 17))"
+        },
+        {
+            "test_data_row_variable": "flight4",
+            "code": "flight4 = Flight(id=4, number=\"AA404\", departure_id=2, arrival_id=4, date=date(2023, 10, 18))"
+        },
+        {
+            "test_data_row_variable": "passenger1",
+            "code": "passenger1 = Passenger(id=1, first_name=\"John\", last_name=\"Doe\", passport_number=\"A1234567\")"
+        },
+        {
+            "test_data_row_variable": "passenger2",
+            "code": "passenger2 = Passenger(id=2, first_name=\"Jane\", last_name=\"Doe\", passport_number=\"B1234567\")"
+        },
+        {
+            "test_data_row_variable": "passenger3",
+            "code": "passenger3 = Passenger(id=3, first_name=\"Alice\", last_name=\"Smith\", passport_number=\"C1234567\")"
+        },
+        {
+            "test_data_row_variable": "passenger4",
+            "code": "passenger4 = Passenger(id=4, first_name=\"Bob\", last_name=\"Johnson\", passport_number=\"D1234567\")"
+        },
+        {
+            "test_data_row_variable": "booking1",
+            "code": "booking1 = Booking(id=1, flight_id=1, passenger_id=1, date_of_booking=datetime(2023, 7, 1, 15, 45), seat_number=\"12A\")"
+        },
+        {
+            "test_data_row_variable": "booking2",
+            "code": "booking2 = Booking(id=2, flight_id=2, passenger_id=2, date_of_booking=datetime(2023, 8, 2, 16, 50), seat_number=\"14B\")"
+        },
+        {
+            "test_data_row_variable": "booking3",
+            "code": "booking3 = Booking(id=3, flight_id=3, passenger_id=3, date_of_booking=datetime(2023, 9, 3, 17, 55), seat_number=\"16C\")"
+        },
+        {
+            "test_data_row_variable": "booking4",
+            "code": "booking4 = Booking(id=4, flight_id=4, passenger_id=4, date_of_booking=datetime(2023, 10, 4, 18, 60), seat_number=\"18D\")"
+        },
+        {
+            "test_data_row_variable": "aircraft1",
+            "code": "aircraft1 = Aircraft(id=1, model=\"Boeing 737\", max_capacity=120, aviation_serial_number=\"SN737001\")"
+        },
+        {
+            "test_data_row_variable": "aircraft2",
+            "code": "aircraft2 = Aircraft(id=2, model=\"Airbus A320\", max_capacity=150, aviation_serial_number=\"SN320002\")"
+        },
+        {
+            "test_data_row_variable": "aircraft3",
+            "code": "aircraft3 = Aircraft(id=3, model=\"Boeing 777\", max_capacity=300, aviation_serial_number=\"SN777003\")"
+        },
+        {
+            "test_data_row_variable": "aircraft4",
+            "code": "aircraft4 = Aircraft(id=4, model=\"Airbus A380\", max_capacity=500, aviation_serial_number=\"SN380004\")"
+        },
+        {
+            "test_data_row_variable": "airline1",
+            "code": "airline1 = Airline(id=1, name=\"American Airlines\", iata_code=\"AA\")"
+        },
+        {
+            "test_data_row_variable": "airline2",
+            "code": "airline2 = Airline(id=2, name=\"British Airways\", iata_code=\"BA\")"
+        },
+        {
+            "test_data_row_variable": "airline3",
+            "code": "airline3 = Airline(id=3, name=\"Japan Airlines\", iata_code=\"JL\")"
+        },
+        {
+            "test_data_row_variable": "airline4",
+            "code": "airline4 = Airline(id=4, name=\"Emirates\", iata_code=\"EK\")"
+        },
+        {
+            "test_data_row_variable": "crew_member1",
+            "code": "crew_member1 = CrewMember(id=1, first_name=\"James\", last_name=\"Brown\", position=\"Pilot\", airline_id=1)"
+        },
+        {
+            "test_data_row_variable": "crew_member2",
+            "code": "crew_member2 = CrewMember(id=2, first_name=\"Emily\", last_name=\"Clark\", position=\"Flight Attendant\", airline_id=2)"
+        },
+        {
+            "test_data_row_variable": "crew_member3",
+            "code": "crew_member3 = CrewMember(id=3, first_name=\"Michael\", last_name=\"Scott\", position=\"Co-Pilot\", airline_id=3)"
+        },
+        {
+            "test_data_row_variable": "crew_member4",
+            "code": "crew_member4 = CrewMember(id=4, first_name=\"Sarah\", last_name=\"Doe\", position=\"Ground Staff\", airline_id=4)"
+        },
+        {
+            "test_data_row_variable": "maintenance_record1",
+            "code": "maintenance_record1 = MaintenanceRecord(id=1, aircraft_id=1, last_maintenance_date=datetime(2023, 5, 20, 14, 0), description=\"Engine Check\")"
+        },
+        {
+            "test_data_row_variable": "maintenance_record2",
+            "code": "maintenance_record2 = MaintenanceRecord(id=2, aircraft_id=2, last_maintenance_date=datetime(2023, 6, 21, 15, 0), description=\"Landing Gear Check\")"
+        },
+        {
+            "test_data_row_variable": "maintenance_record3",
+            "code": "maintenance_record3 = MaintenanceRecord(id=3, aircraft_id=3, last_maintenance_date=datetime(2023, 7, 22, 16, 0), description=\"Cabin Pressure Test\")"
+        },
+        {
+            "test_data_row_variable": "maintenance_record4",
+            "code": "maintenance_record4 = MaintenanceRecord(id=4, aircraft_id=4, last_maintenance_date=datetime(2023, 8, 23, 17, 0), description=\"Fuel System Check\")"
+        },
+        {
+            "test_data_row_variable": "luggage1",
+            "code": "luggage1 = Luggage(id=1, passenger_id=1, weight=23.5, dimensions=\"55x40x20\")"
+        },
+        {
+            "test_data_row_variable": "luggage2",
+            "code": "luggage2 = Luggage(id=2, passenger_id=2, weight=18.0, dimensions=\"50x35x25\")"
+        },
+        {
+            "test_data_row_variable": "luggage3",
+            "code": "luggage3 = Luggage(id=3, passenger_id=3, weight=30.0, dimensions=\"60x45x30\")"
+        },
+        {
+            "test_data_row_variable": "luggage4",
+            "code": "luggage4 = Luggage(id=4, passenger_id=4, weight=15.0, dimensions=\"40x30x15\")"
+        },
+        {
+            "test_data_row_variable": "check_in1",
+            "code": "check_in1 = CheckIn(id=1, booking_id=1, check_in_time=datetime(2023, 7, 15, 10, 30), gate_number=\"G1\")"
+        },
+        {
+            "test_data_row_variable": "check_in2",
+            "code": "check_in2 = CheckIn(id=2, booking_id=2, check_in_time=datetime(2023, 8, 16, 11, 45), gate_number=\"G2\")"
+        },
+        {
+            "test_data_row_variable": "check_in3",
+            "code": "check_in3 = CheckIn(id=3, booking_id=3, check_in_time=datetime(2023, 9, 17, 12, 50), gate_number=\"G3\")"
+        },
+        {
+            "test_data_row_variable": "check_in4",
+            "code": "check_in4 = CheckIn(id=4, booking_id=4, check_in_time=datetime(2023, 10, 18, 13, 55), gate_number=\"G4\")"
+        },
+        {
+            "test_data_row_variable": "route1",
+            "code": "route1 = Route(id=1, airline_id=1, from_airport_id=1, to_airport_id=2, duration=360)"
+        },
+        {
+            "test_data_row_variable": "route2",
+            "code": "route2 = Route(id=2, airline_id=2, from_airport_id=4, to_airport_id=3, duration=420)"
+        },
+        {
+            "test_data_row_variable": "route3",
+            "code": "route3 = Route(id=3, airline_id=3, from_airport_id=3, to_airport_id=1, duration=480)"
+        },
+        {
+            "test_data_row_variable": "route4",
+            "code": "route4 = Route(id=4, airline_id=4, from_airport_id=2, to_airport_id=4, duration=540)"
+        },
+        {
+            "test_data_row_variable": "boarding_pass1",
+            "code": "boarding_pass1 = BoardingPass(id=1, booking_id=1, issued_time=datetime(2023, 7, 15, 9, 0), seat_number=\"12A\")"
+        },
+        {
+            "test_data_row_variable": "boarding_pass2",
+            "code": "boarding_pass2 = BoardingPass(id=2, booking_id=2, issued_time=datetime(2023, 8, 16, 10, 15), seat_number=\"14B\")"
+        },
+        {
+            "test_data_row_variable": "boarding_pass3",
+            "code": "boarding_pass3 = BoardingPass(id=3, booking_id=3, issued_time=datetime(2023, 9, 17, 11, 30), seat_number=\"16C\")"
+        },
+        {
+            "test_data_row_variable": "boarding_pass4",
+            "code": "boarding_pass4 = BoardingPass(id=4, booking_id=4, issued_time=datetime(2023, 10, 18, 12, 45), seat_number=\"18D\")"
+        }
+    ],
+    "test_data_sqlite": "The test data rows have been created in Python, and not converted into SQLite INSERT statements as per the guidelines.",
+    "name": "AirportFlightMgmt"
+}

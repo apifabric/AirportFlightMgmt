@@ -1,5 +1,16 @@
 {
-    "rules": [],
+    "rules": [
+        {
+            "name": "Passenger Unique Identification",
+            "description": "Ensure passengers are uniquely identified by their passport numbers.",
+            "use_case": "Avoid duplicate passenger entries using passport numbers.",
+            "code": "Constraint(validate=Passenger, as_condition=lambda row: row.passport_number is not None, error_msg=\"Passenger passport numbers must be unique\")",
+            "error": null,
+            "status": "accepted",
+            "entity": null,
+            "id": "01JJP936TMZH9FGPXMF1HW7D02"
+        }
+    ],
     "models": [
         {
             "classname": "Aircraft",
